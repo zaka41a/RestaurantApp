@@ -1,0 +1,24 @@
+# === Ignorer JavaScript/TypeScript dans les stats Linguist ===
+*.js               linguist-vendored
+*.mjs              linguist-vendored
+*.cjs              linguist-vendored
+*.jsx              linguist-vendored
+*.ts               linguist-vendored
+*.tsx              linguist-vendored
+*.min.js           linguist-vendored
+*.map              linguist-vendored
+
+# === Ignorer les dossiers front/bundles ===
+node_modules/**    linguist-vendored
+frontend/**        linguist-vendored
+dist/**            linguist-vendored
+build/**           linguist-vendored
+public/js/**       linguist-vendored
+public/assets/**   linguist-vendored
+
+# === (optionnel) ignorer CSS compilé ===
+*.min.css          linguist-vendored
+public/css/**      linguist-vendored
+
+# === (optionnel) forcer PHP sur le dossier backend si besoin ===
+backend/**         linguist-language=PHP
