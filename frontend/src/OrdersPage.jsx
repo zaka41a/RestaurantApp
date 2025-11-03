@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import "./index.css";
+
+const IMAGE_BASE = "http://localhost/RestaurantApp/backend/";
 
 export default function OrdersPage() {
   const [menu, setMenu] = useState([]);
@@ -7,133 +8,170 @@ export default function OrdersPage() {
   const [selectedTable, setSelectedTable] = useState("");
   const [cart, setCart] = useState([]);
 
-  // Base URL pour les images (ton backend)
-  const IMAGE_BASE = "http://localhost/RestaurantApp/backend/";
-
-  // Charger menu et tables
   useEffect(() => {
     fetch("http://localhost/RestaurantApp/backend/api/menu.php", { credentials: "include" })
-      .then((r) => r.json())
+      .then((response) => response.json())
       .then(setMenu)
       .catch(() => setMenu([]));
 
     fetch("http://localhost/RestaurantApp/backend/api/tables.php", { credentials: "include" })
-      .then((r) => r.json())
+      .then((response) => response.json())
       .then(setTables)
       .catch(() => setTables([]));
   }, []);
 
-  // Ajouter au panier
   const addToCart = (item) => {
-    const existing = cart.find((c) => c.id === item.id);
-    if (existing) {
-      setCart(cart.map((c) => (c.id === item.id ? { ...c, qty: c.qty + 1 } : c)));
-    } else {
-      setCart([...cart, { ...item, qty: 1 }]);
-    }
+    setCart((prev) => {
+      const existing = prev.find((line) => line.id === item.id);
+      if (existing) {
+        return prev.map((line) =>
+          line.id === item.id ? { ...line, qty: line.qty + 1 } : line
+        );
+      }
+      return [...prev, { ...item, qty: 1 }];
+    });
   };
 
-  // Retirer un article du panier
-  const removeFromCart = (id) => setCart(cart.filter((c) => c.id !== id));
+  const removeFromCart = (id) => setCart((prev) => prev.filter((line) => line.id !== id));
 
-  // Total
-  const total = cart.reduce((sum, c) => sum + Number(c.price) * c.qty, 0);
+  const total = cart.reduce((sum, line) => sum + Number(line.price) * line.qty, 0);
 
-  // Valider la commande
   const submitOrder = () => {
     if (!selectedTable) {
-      alert("Choisissez une table !");
+      alert("Select a table before submitting the order.");
       return;
     }
+
     fetch("http://localhost/RestaurantApp/backend/api/orders.php", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         table_id: selectedTable,
-        items: cart.map((c) => ({
-          menu_item_id: c.id,
-          qty: c.qty,
-          unit_price: Number(c.price),
+        items: cart.map((line) => ({
+          menu_item_id: line.id,
+          qty: line.qty,
+          unit_price: Number(line.price),
         })),
       }),
     })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.ok) {
-          alert("Commande validée !");
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.ok) {
+          alert("Order submitted successfully.");
           setCart([]);
         } else {
-          alert("Erreur: " + JSON.stringify(d));
+          alert("Something went wrong: " + JSON.stringify(data));
         }
       })
-      .catch((e) => alert("Erreur réseau: " + e.message));
+      .catch((error) => alert("Network error: " + error.message));
   };
 
   return (
-    <div className="orders-container">
-      {/* Colonne gauche : liste des plats */}
-      <div className="menu-list">
-        <h2>Prendre une commande</h2>
-
-        <div className="table-select">
-          <label>Table </label>
-          <select value={selectedTable} onChange={(e) => setSelectedTable(e.target.value)}>
-            <option value="">-- Choisir --</option>
-            {tables.map((t) => (
-              <option key={t.id} value={t.id}>
-                Table {t.id} ({t.seats} places) — {t.status}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="menu-grid">
-          {menu.map((m) => (
-            <div key={m.id} className="menu-card" onClick={() => addToCart(m)}>
-              <img src={`${IMAGE_BASE}${m.image_path}`} alt={m.name} />
-              <div className="menu-card-body">
-                <p className="category">{m.category_name}</p>
-                <h3 className="title">{m.name}</h3>
-                {m.description ? (
-                  <p className="description">{m.description}</p>
-                ) : null}
-                <p className="price">{Number(m.price).toFixed(2)} €</p>
-              </div>
+    <div className="page">
+      <div className="orders-layout">
+        <section className="surface-card orders-menu">
+          <header className="page-header">
+            <div className="page-header__info">
+              <span className="eyebrow">Order capture</span>
+              <h2 className="page-title">Build the perfect ticket in a few taps.</h2>
+              <p className="page-subtitle">
+                Select a table, add dishes, and send the order directly to the kitchen workflow.
+              </p>
             </div>
-          ))}
-        </div>
-      </div>
+          </header>
 
-      {/* Colonne droite : panier */}
-      <aside className="cart-box">
-        <h3>🧺 Panier</h3>
+          <div className="table-select">
+            <label>Table</label>
+            <select
+              className="select"
+              value={selectedTable}
+              onChange={(e) => setSelectedTable(e.target.value)}
+            >
+              <option value="">Select a table</option>
+              {tables.map((table) => {
+                const statusLabel =
+                  table.status === "free"
+                    ? "available"
+                    : table.status === "occupied"
+                    ? "occupied"
+                    : table.status;
+                return (
+                  <option key={table.id} value={table.id}>
+                    Table {table.id} ({table.seats} seats) — {statusLabel}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
 
-        {cart.length === 0 ? (
-          <p className="empty">Aucun article.</p>
-        ) : (
-          <ul className="cart-list">
-            {cart.map((c) => (
-              <li key={c.id} className="cart-item">
-                <span className="cart-line">
-                  {c.name} × {c.qty}
-                </span>
-                <button className="cart-remove" onClick={() => removeFromCart(c.id)}>
-                  ✕
-                </button>
-              </li>
+          <div className="catalog-grid">
+            {menu.map((item) => (
+              <article key={item.id} className="catalog-card" onClick={() => addToCart(item)}>
+                <div className="catalog-card__media">
+                  {item.image_path ? (
+                    <img src={`${IMAGE_BASE}${item.image_path}`} alt={item.name} />
+                  ) : null}
+                </div>
+                <div className="catalog-card__body">
+                  <span className="catalog-card__category">{item.category_name}</span>
+                  <h3 className="catalog-card__title">{item.name}</h3>
+                  <p className="catalog-card__description">
+                    {item.description || "No description available for this dish yet."}
+                  </p>
+                  <div className="catalog-card__footer">
+                    <span className="price-tag">{Number(item.price).toFixed(2)} €</span>
+                    <span className="badge badge-neutral">Add</span>
+                  </div>
+                </div>
+              </article>
             ))}
-          </ul>
-        )}
+          </div>
+        </section>
 
-        <div className="cart-total">
-          Total: <strong>{total.toFixed(2)} €</strong>
-        </div>
+        <aside className="orders-cart surface-card">
+          <div className="page-header cart-header">
+            <div className="page-header__info">
+              <span className="eyebrow">Current basket</span>
+              <h3 className="page-title cart-title">Live order</h3>
+            </div>
+          </div>
 
-        <button className="cart-btn" disabled={cart.length === 0} onClick={submitOrder}>
-          Valider la commande
-        </button>
-      </aside>
+          {cart.length === 0 ? (
+            <div className="cart-empty">No items added to this order yet.</div>
+          ) : (
+            <ul className="cart-list">
+              {cart.map((line) => (
+                <li key={line.id} className="cart-item">
+                  <div className="cart-item__text">
+                    <span className="cart-item__title">{line.name}</span>
+                    <span className="cart-item__meta">
+                      {line.qty} × {Number(line.price).toFixed(2)} €
+                    </span>
+                  </div>
+                  <button className="cart-remove" type="button" onClick={() => removeFromCart(line.id)}>
+                    ✕
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="cart-summary">
+            <span>Total</span>
+            <span className="price-tag">{total.toFixed(2)} €</span>
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={cart.length === 0}
+            onClick={submitOrder}
+          >
+            Submit order
+          </button>
+        </aside>
+      </div>
     </div>
   );
 }

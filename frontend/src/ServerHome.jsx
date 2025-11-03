@@ -1,27 +1,69 @@
 import { Link } from "react-router-dom";
+import Icon from "./components/Icon.jsx";
 
-export default function ServerHome(){
+export default function ServerHome() {
+  async function logout() {
+    await fetch("http://localhost/RestaurantApp/backend/api/auth/logout.php", {
+      credentials: "include",
+    });
+    window.location.href = "/";
+  }
+
   return (
-    <div style={{minHeight:"100vh", background:"#0b0c1a", color:"#eaeaff", display:"grid", placeItems:"center"}}>
-      <div style={{textAlign:"center"}}>
-        <h1 style={{fontSize:30, marginBottom:8}}>👨‍🍳 Espace Serveur</h1>
-        <p>Actions rapides :</p>
-        <div style={{display:"flex", gap:14, justifyContent:"center", marginTop:16, flexWrap:"wrap"}}>
-          <Link to="/server/orders" style={btn}>🧾 Nouvelle commande</Link>
-          <Link to="/server/tables" style={btn}>🍽️ Tables</Link>
-          <Link to="/server/menu" style={btn}>📋 Voir le menu</Link>
+    <div className="server-home">
+      <div className="server-home__panel surface-card">
+        <span className="eyebrow">Server workspace</span>
+        <h1 className="page-title">Deliver a flawless guest journey.</h1>
+        <p className="page-subtitle">
+          Jump straight into the tasks that matter most—capture orders, coordinate tables, and keep
+          the menu at your fingertips.
+        </p>
+
+        <div className="action-links">
+          <Link to="/server/orders" className="action-link">
+            <span className="action-link__icon">
+              <Icon name="orders" size={20} />
+            </span>
+            <div>
+              <span className="action-link__title">Create a new order</span>
+              <span className="action-link__subtitle">
+                Build the ticket and send it to the kitchen in one go.
+              </span>
+            </div>
+          </Link>
+
+          <Link to="/server/tables" className="action-link">
+            <span className="action-link__icon">
+              <Icon name="table" size={20} />
+            </span>
+            <div>
+              <span className="action-link__title">Monitor table rotation</span>
+              <span className="action-link__subtitle">
+                Check availability, flip status, and keep guests moving.
+              </span>
+            </div>
+          </Link>
+
+          <Link to="/server/menu" className="action-link">
+            <span className="action-link__icon">
+              <Icon name="menu" size={20} />
+            </span>
+            <div>
+              <span className="action-link__title">Review the live menu</span>
+              <span className="action-link__subtitle">
+                Share dish highlights, pricing, and chef notes instantly.
+              </span>
+            </div>
+          </Link>
         </div>
-        <div style={{marginTop:24}}>
-          <button onClick={()=>{
-              fetch("http://localhost/RestaurantApp/backend/api/auth/logout.php",{credentials:"include"});
-              location.href="/";
-            }}
-            style={{...btn, background:"#ef4444"}}>
-            🚪 Déconnexion
+
+        <div className="server-home__footer">
+          <button type="button" className="btn btn-ghost" onClick={logout}>
+            <Icon name="logout" size={18} />
+            <span>Sign out</span>
           </button>
         </div>
       </div>
     </div>
   );
 }
-const btn={background:"#22d3ee", color:"#0b0c1a", padding:"10px 14px", borderRadius:10, textDecoration:"none", fontWeight:700};

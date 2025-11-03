@@ -1,28 +1,36 @@
-// src/components/TopBar.jsx
 import { useNavigate } from "react-router-dom";
+import logoMark from "../assets/logo-mark.svg";
+import Icon from "./Icon.jsx";
 
 export default function TopBar({ title, onLogout, right, backTo }) {
   const nav = useNavigate();
+
   return (
-    <header style={{
-      display:"flex", alignItems:"center", justifyContent:"space-between",
-      background:"#0f1224", borderBottom:"1px solid #ffffff22", padding:"10px 14px", color:"#eaeaff"
-    }}>
-      <div style={{display:"flex", gap:10, alignItems:"center"}}>
+    <header className="surface-card topbar">
+      <div className="topbar__left">
         <button
-          onClick={()=> backTo ? nav(backTo) : nav(-1)}
-          style={{background:"#1f2937", border:"1px solid #ffffff33", color:"#eaeaff",
-          padding:"6px 10px", borderRadius:8}}
+          type="button"
+          className="topbar__back"
+          onClick={() => (backTo ? nav(backTo) : nav(-1))}
         >
-          ← Retour
+          <Icon name="arrowLeft" size={18} />
+          <span>Back</span>
         </button>
-        <h1 style={{fontSize:20, margin:0}}>{title}</h1>
+
+        <div className="topbar__brand">
+          <img src={logoMark} alt="RestaurantApp" />
+          <div className="topbar__title">
+            <span className="eyebrow">RestaurantApp</span>
+            <h1>{title}</h1>
+          </div>
+        </div>
       </div>
-      <div style={{display:"flex", alignItems:"center", gap:10}}>
+
+      <div className="topbar__right">
         {right}
-        <button onClick={onLogout}
-          style={{background:"#ef4444", border:"none", color:"#fff", padding:"8px 12px", borderRadius:8}}>
-          Déconnexion
+        <button type="button" className="btn btn-ghost" onClick={onLogout}>
+          <Icon name="logout" size={18} />
+          <span>Sign out</span>
         </button>
       </div>
     </header>

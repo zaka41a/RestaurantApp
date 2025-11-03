@@ -1,77 +1,181 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import TopBar from "./components/TopBar";
+import Icon from "./components/Icon.jsx";
 
 export default function ServersPage() {
   const [list, setList] = useState([]);
-  const [form, setForm] = useState({ full_name:"", email:"", phone:"", password:"" });
+  const [form, setForm] = useState({ full_name: "", email: "", phone: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  async function logout(){
-    await fetch("http://localhost/RestaurantApp/backend/api/auth/logout.php",{credentials:"include"});
-    location.href="/";
-  }
-  async function load(){ const r=await fetch("http://localhost/RestaurantApp/backend/api/admin/servers.php",{credentials:"include"}); setList(await r.json()); }
-  useEffect(()=>{ load(); },[]);
-
-  async function addServer(e){
-    e.preventDefault(); setLoading(true);
-    const r=await fetch("http://localhost/RestaurantApp/backend/api/admin/servers.php",{
-      method:"POST", credentials:"include", headers:{"Content-Type":"application/json"}, body:JSON.stringify(form)
+  async function logout() {
+    await fetch("http://localhost/RestaurantApp/backend/api/auth/logout.php", {
+      credentials: "include",
     });
-    setLoading(false);
-    if(r.ok){ setForm({full_name:"",email:"",phone:"",password:""}); load(); }
-    else { const err=await r.json().catch(()=>({})); alert(err.error||"Erreur"); }
-  }
-  async function remove(id){
-    if(!confirm("Supprimer ce serveur ?")) return;
-    const r=await fetch(`http://localhost/RestaurantApp/backend/api/admin/servers.php?id=${id}`,{method:"DELETE",credentials:"include"});
-    if(r.ok) load();
+    window.location.href = "/";
   }
 
-  const toTablesBtn = (
-    <Link to="/admin/tables" style={{background:"#2563eb", color:"#fff", borderRadius:8, padding:"8px 12px", textDecoration:"none"}}>
-      Voir les tables
-    </Link>
-  );
+  async function load() {
+    const response = await fetch("http://localhost/RestaurantApp/backend/api/admin/servers.php", {
+      credentials: "include",
+    });
+    setList(await response.json());
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function addServer(e) {
+    e.preventDefault();
+    setLoading(true);
+
+    const response = await fetch("http://localhost/RestaurantApp/backend/api/admin/servers.php", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    setLoading(false);
+
+    if (response.ok) {
+      setForm({ full_name: "", email: "", phone: "", password: "" });
+      load();
+    } else {
+      const err = await response.json().catch(() => ({}));
+      alert(err.error || "Unable to create the server profile.");
+    }
+  }
+
+  async function remove(id) {
+    if (!confirm("Remove this server from the team?")) return;
+    const response = await fetch(
+      `http://localhost/RestaurantApp/backend/api/admin/servers.php?id=${id}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+    if (response.ok) load();
+  }
 
   return (
-    <div style={{minHeight:"100vh", background:"#0b0c1a", color:"#eaeaff"}}>
-<TopBar title="Gestion des serveurs" onLogout={logout} backTo="/admin" />
-      <div style={{maxWidth:900, margin:"0 auto", padding:"28px 16px"}}>
-        <form onSubmit={addServer}
-          style={{display:"grid", gap:10, background:"#141529", borderRadius:12, padding:16, border:"1px solid #ffffff22"}}>
-          <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:10}}>
-            <input required placeholder="Nom complet" value={form.full_name} onChange={e=>setForm({...form, full_name:e.target.value})} style={input}/>
-            <input required type="email" placeholder="Email" value={form.email} onChange={e=>setForm({...form, email:e.target.value})} style={input}/>
-          </div>
-          <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:10}}>
-            <input placeholder="Téléphone" value={form.phone} onChange={e=>setForm({...form, phone:e.target.value})} style={input}/>
-            <input placeholder="Mot de passe (défaut: server123)" value={form.password} onChange={e=>setForm({...form, password:e.target.value})} style={input}/>
-          </div>
-          <button disabled={loading} style={{background:"#10b981", color:"#0b0c1a", padding:"10px 16px", borderRadius:10, border:0, fontWeight:700}}>
-            {loading ? "Ajout..." : "Ajouter un serveur"}
-          </button>
-        </form>
+    <div className="page">
+      <TopBar
+        title="Server management"
+        onLogout={logout}
+        backTo="/admin"
+        right={
+          <Link to="/admin/tables" className="btn btn-outline">
+            <Icon name="table" size={18} />
+            <span>Table board</span>
+          </Link>
+        }
+      />
 
-        <div style={{marginTop:18, overflowX:"auto"}}>
-          <table style={{width:"100%", borderCollapse:"collapse"}}>
-            <thead><tr style={{color:"#9aa0ff"}}><th style={th}>ID</th><th style={th}>Nom</th><th style={th}>Email</th><th style={th}>Téléphone</th><th style={th}>Créé</th><th style={th}></th></tr></thead>
+      <section className="surface-card section-card">
+        <header className="page-header">
+          <div className="page-header__info">
+            <span className="eyebrow">Floor team</span>
+            <h2 className="page-title">Invite your servers and keep the service coordinated.</h2>
+            <p className="page-subtitle">
+              Capture their contact details. Provide a starter password—they can update it after the
+              first login.
+            </p>
+          </div>
+        </header>
+
+        <form className="form-grid" onSubmit={addServer}>
+          <div className="form-grid inline">
+            <input
+              required
+              placeholder="Full name"
+              className="input"
+              value={form.full_name}
+              onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+            />
+            <input
+              required
+              type="email"
+              placeholder="Work email"
+              className="input"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </div>
+          <div className="form-grid inline">
+            <input
+              placeholder="Phone number (optional)"
+              className="input"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
+            <input
+              placeholder="Initial password (default: server123)"
+              className="input"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+            />
+          </div>
+          <div className="page-header__actions">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? "Creating…" : "Add server"}
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => setForm({ full_name: "", email: "", phone: "", password: "" })}
+            >
+              Clear form
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="menu-preview">
+        <div className="surface-card menu-preview__table">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Created</th>
+                <th></th>
+              </tr>
+            </thead>
             <tbody>
-              {list.map(s=>(
-                <tr key={s.id} style={{borderTop:"1px solid #ffffff22"}}>
-                  <td style={td}>{s.id}</td><td style={td}>{s.full_name}</td><td style={td}>{s.email}</td><td style={td}>{s.phone||"-"}</td>
-                  <td style={td}>{s.created_at?.slice(0,19).replace("T"," ")}</td>
-                  <td style={td}><button onClick={()=>remove(s.id)} style={{background:"#ef4444", color:"#fff", border:0, borderRadius:8, padding:"6px 10px"}}>Supprimer</button></td>
+              {list.map((server) => (
+                <tr key={server.id}>
+                  <td>{server.id}</td>
+                  <td>{server.full_name}</td>
+                  <td>{server.email}</td>
+                  <td>{server.phone || "—"}</td>
+                  <td>{server.created_at?.slice(0, 19).replace("T", " ")}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => remove(server.id)}
+                    >
+                      Remove
+                    </button>
+                  </td>
                 </tr>
               ))}
-              {list.length===0 && <tr><td style={td} colSpan={6}>Aucun serveur pour le moment.</td></tr>}
+              {list.length === 0 && (
+                <tr>
+                  <td colSpan={6}>
+                    <div className="empty-state">No server profiles yet.</div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
-const input={background:"#0e1022", border:"1px solid #ffffff22", color:"#eaeaff", padding:"10px 12px", borderRadius:10};
-const th={textAlign:"left", padding:"10px 8px"}; const td={padding:"10px 8px"};

@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="faviconGradient" x1="6" y1="8" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5C6CFF"/>
+      <stop offset="0.48" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#00C6FF"/>
+    </linearGradient>
+    <linearGradient id="faviconTray" x1="20" y1="44" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#E0E7FF" stop-opacity="0.7"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="url(#faviconGradient)"/>
+  <path d="M32 18.5c7.18 0 13 5.82 13 13v1.5h3.2a1.8 1.8 0 010 3.6H15.8a1.8 1.8 0 010-3.6H19V31.5c0-7.18 5.82-13 13-13zm0 3.6c-4.97 0-9 4.03-9 9v2h18v-2c0-4.97-4.03-9-9-9z" fill="white"/>
+  <path d="M26.6 40.8h10.8c.96 0 1.74.78 1.74 1.74 0 .74-.48 1.38-1.2 1.62l-5.4 1.52a1.7 1.7 0 01-.96 0l-5.4-1.52a1.68 1.68 0 01-1.2-1.62c0-.96.78-1.74 1.74-1.74z" fill="url(#faviconTray)"/>
+  <circle cx="34" cy="46" r="3" fill="#1E1B4B" opacity="0.9"/>
+  <rect x="30.4" y="15" width="3.2" height="3.8" rx="1.6" fill="#F8FAFC" opacity="0.8"/>
+</svg>

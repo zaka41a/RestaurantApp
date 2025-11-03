@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logoWord from "./assets/logo-word.svg";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -9,78 +10,80 @@ export default function Login({ onLogin }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    const r = await fetch("http://localhost/RestaurantApp/backend/api/auth/login.php", {
+
+    const response = await fetch("http://localhost/RestaurantApp/backend/api/auth/login.php", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await r.json().catch(() => ({}));
+    const data = await response.json().catch(() => ({}));
     setLoading(false);
 
-    if (r.ok && data.success) {
+    if (response.ok && data.success) {
       onLogin(data);
     } else {
-      alert(data.message || "Login failed");
+      alert(data.message || "Invalid credentials");
     }
   }
 
   return (
-    <div className="login-wrapper">
-      <div className="login-card">
-        {/* En-tête */}
-        <div className="login-header">
+    <div className="login-screen">
+      <div className="login-card surface-card">
+        <div className="login-card__head">
+          <span className="brand-lockup">
+            <img src={logoWord} alt="RestaurantApp" />
+          </span>
           <div>
-            <h1 className="login-title">RestaurantApp</h1>
-            <p className="login-sub">Accès sécurisé</p>
+            <p className="eyebrow">Secure workspace</p>
+            <h1 className="page-title">Sign in</h1>
+            <p className="page-subtitle">
+              Authenticate with your staff account to manage the dining room and service flow.
+            </p>
           </div>
         </div>
 
-        {/* Formulaire */}
-        <form onSubmit={handleSubmit} className="login-form">
-          <div>
-            <label className="login-label">Email</label>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="field">
+            <label>Work email</label>
             <input
               type="email"
-              className="login-input"
-              placeholder="ex: zaksab89@gmail.com"
+              className="input"
+              placeholder="e.g. server@restaurant.app"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
 
-          <div>
-            <label className="login-label">Mot de passe</label>
-            <div className="password-wrap">
+          <div className="field">
+            <label>Password</label>
+            <div className="password-field">
               <input
                 type={showPassword ? "text" : "password"}
-                className="login-input"
-                placeholder="Votre mot de passe"
+                className="input"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
               <button
                 type="button"
-                className="show-btn"
-                onClick={() => setShowPassword((s) => !s)}
+                className="toggle-visibility"
+                onClick={() => setShowPassword((value) => !value)}
               >
-                {showPassword ? "👁️" : "👁️"}
+                {showPassword ? "Hide" : "Show"}
               </button>
             </div>
           </div>
 
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? "Connexion..." : "Se connecter"}
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? "Signing in…" : "Access workspace"}
           </button>
         </form>
 
-        {/* Liens */}
-
-
-        <div className="login-copy">© 2025 Zaka41a</div>
+        <div className="login-footer">© 2025 RestaurantApp • Operated by Zaka41a</div>
       </div>
     </div>
   );

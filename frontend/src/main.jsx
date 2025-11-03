@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import "./index.css";
+import "./pro.css";
 
 import Login from "./Login.jsx";
 import AdminHome from "./AdminHome.jsx";
@@ -12,7 +12,7 @@ import MenuPage from "./MenuPage.jsx";
 import OrdersPage from "./OrdersPage.jsx";
 import MenuView from "./MenuView.jsx";
 
-// Chargement différé du composant ServerMenu (correct, sans "await" dans JSX)
+// Lazy load the server menu to keep the initial bundle lean.
 const ServerMenu = React.lazy(() => import("./ServerMenu.jsx"));
 
 function App() {
@@ -60,7 +60,11 @@ function App() {
           <Route
             path="/server/menu"
             element={
-              <Suspense fallback={<div style={{ padding: 24 }}>Chargement…</div>}>
+              <Suspense
+                fallback={
+                  <div className="surface-card section-card loading-card">Chargement…</div>
+                }
+              >
                 <ServerMenu />
               </Suspense>
             }

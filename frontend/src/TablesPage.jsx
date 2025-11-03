@@ -1,59 +1,75 @@
 import { useEffect, useState } from "react";
 import TopBar from "./components/TopBar";
+
 const API = "http://localhost/RestaurantApp/backend/api";
 
 export default function TablesPage() {
   const [tables, setTables] = useState([]);
 
   async function loadTables() {
-    const r = await fetch(`${API}/tables.php`, { credentials: "include" });
-    setTables(await r.json());
+    const response = await fetch(`${API}/tables.php`, { credentials: "include" });
+    setTables(await response.json());
   }
-  useEffect(() => { loadTables(); }, []);
+
+  useEffect(() => {
+    loadTables();
+  }, []);
 
   async function toggleStatus(id, status) {
-    const r = await fetch(`${API}/tables.php?id=${id}`, {
-      method: "PATCH", credentials: "include",
+    const response = await fetch(`${API}/tables.php?id=${id}`, {
+      method: "PATCH",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
-    if (r.ok) loadTables();
+    if (response.ok) loadTables();
   }
 
-  async function logout(){
-    await fetch(`${API}/auth/logout.php`,{credentials:"include"});
-    location.href="/";
+  async function logout() {
+    await fetch(`${API}/auth/logout.php`, { credentials: "include" });
+    window.location.href = "/";
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0b0c1a", color: "#fff" }}>
-      <TopBar title="Gestion des tables" onLogout={logout} />
-      <main style={{ maxWidth: 1000, margin: "0 auto", padding: 20 }}>
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px,1fr))",
-          gap: 16
-        }}>
-          {tables.map((t) => (
-            <div key={t.id} style={{
-              background: "#141529", border: "1px solid #ffffff22", borderRadius: 12, padding: 16, textAlign: "center"
-            }}>
-              <h2 style={{ fontSize: 20, margin: "0 0 6px" }}>Table {t.number}</h2>
-              <p>Places : {t.seats}</p>
-              <p>Status : <b style={{ color: t.status === "free" ? "lightgreen" : "tomato" }}>{t.status}</b></p>
-              <button
-                onClick={() => toggleStatus(t.id, t.status === "free" ? "occupied" : "free")}
-                style={{
-                  marginTop: 10,
-                  background: t.status === "free" ? "#2563eb" : "#ef4444",
-                  border: 0, color: "#fff", padding: "8px 12px", borderRadius: 8,
-                }}
-              >
-                {t.status === "free" ? "Occuper" : "Libérer"}
-              </button>
+    <div className="page">
+      <TopBar title="Table management" onLogout={logout} />
+
+      <section className="surface-card section-card">
+        <header className="page-header">
+          <div className="page-header__info">
+            <span className="eyebrow">Dining room map</span>
+            <h2 className="page-title">Monitor real-time availability at a glance.</h2>
+            <p className="page-subtitle">
+              Toggle a table between available and occupied to keep everyone synced and speed up
+              turnover.
+            </p>
+          </div>
+        </header>
+
+        <div className="tiles-grid">
+          {tables.map((table) => (
+            <div key={table.id} className="table-card">
+              <h2>Table {table.number}</h2>
+              <p>Seats available: {table.seats}</p>
+              <span className={`status-pill ${table.status}`}>
+                {table.status === "free" ? "Available" : "Occupied"}
+              </span>
+              <div className="table-card__actions">
+                <button
+                  type="button"
+                  className={table.status === "free" ? "btn btn-outline" : "btn btn-danger"}
+                  onClick={() => toggleStatus(table.id, table.status === "free" ? "occupied" : "free")}
+                >
+                  {table.status === "free" ? "Mark as occupied" : "Mark as free"}
+                </button>
+              </div>
             </div>
           ))}
+          {tables.length === 0 && (
+            <div className="empty-state">No tables to display right now.</div>
+          )}
         </div>
-      </main>
+      </section>
     </div>
   );
 }

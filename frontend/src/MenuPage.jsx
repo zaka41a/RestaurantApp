@@ -4,18 +4,27 @@ import TopBar from "./components/TopBar";
 const API = "http://localhost/RestaurantApp/backend/api";
 const IMG_BASE = "http://localhost/RestaurantApp/backend/";
 
-export default function MenuPage(){
-  const [items,setItems]=useState([]);
-  const [form,setForm]=useState({category_id:1, name:"", price:"", image_path:"", description:""});
-  const [file,setFile] = useState(null);
+export default function MenuPage() {
+  const [items, setItems] = useState([]);
+  const [form, setForm] = useState({
+    category_id: 1,
+    name: "",
+    price: "",
+    image_path: "",
+    description: "",
+  });
+  const [file, setFile] = useState(null);
 
-  async function load(){
-    const r=await fetch(`${API}/menu.php`,{credentials:"include"});
-    setItems(await r.json());
+  async function load() {
+    const response = await fetch(`${API}/menu.php`, { credentials: "include" });
+    setItems(await response.json());
   }
-  useEffect(()=>{load();},[]);
 
-  async function add(e){
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function add(e) {
     e.preventDefault();
 
     if (file) {
@@ -26,96 +35,169 @@ export default function MenuPage(){
       fd.append("description", form.description);
       fd.append("image", file);
 
-      const r = await fetch(`${API}/menu.php`, { method:"POST", credentials:"include", body: fd });
-      const data = await r.json().catch(()=>({}));
-      if(!r.ok) return alert(data.error || "Upload échoué");
-    } else {
-      const r=await fetch(`${API}/menu.php`,{
-        method:"POST", credentials:"include",
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(form)
+      const response = await fetch(`${API}/menu.php`, {
+        method: "POST",
+        credentials: "include",
+        body: fd,
       });
-      const data = await r.json().catch(()=>({}));
-      if(!r.ok){ return alert(data.error||"Erreur"); }
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) return alert(data.error || "Image upload failed.");
+    } else {
+      const response = await fetch(`${API}/menu.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) return alert(data.error || "Unable to save the dish.");
     }
 
-    setForm({category_id:1, name:"", price:"", image_path:"", description:""});
+    setForm({ category_id: 1, name: "", price: "", image_path: "", description: "" });
     setFile(null);
     await load();
   }
 
-  async function del(id){
-    if(!confirm("Supprimer ce plat ?")) return;
-    const r=await fetch(`${API}/menu.php?id=${id}`,{method:"DELETE", credentials:"include"});
-    if(r.ok) load();
+  async function del(id) {
+    if (!confirm("Remove this dish from the menu?")) return;
+    const response = await fetch(`${API}/menu.php?id=${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    if (response.ok) load();
   }
 
-  async function logout(){
-    await fetch(`${API}/auth/logout.php`,{credentials:"include"});
-    location.href="/";
+  async function logout() {
+    await fetch(`${API}/auth/logout.php`, { credentials: "include" });
+    window.location.href = "/";
   }
 
   return (
-    <div style={{minHeight:"100vh", background:"#0b0c1a", color:"#eaeaff"}}>
-      <TopBar title="Gestion du menu" onLogout={logout} />
-      <main style={{maxWidth:1100, margin:"0 auto", padding:24}}>
-        <form onSubmit={add} style={{display:"grid", gap:10, background:"#141529",
-          border:"1px solid #ffffff25", padding:16, borderRadius:14}}>
-          <div style={{display:"grid", gridTemplateColumns:"220px 1fr 1fr 1fr", gap:10}}>
-            <select value={form.category_id} onChange={e=>setForm({...form, category_id:+e.target.value})} style={input}>
-              <option value={1}>Entrées</option>
+    <div className="page">
+      <TopBar title="Menu management" onLogout={logout} />
+
+      <section className="surface-card section-card">
+        <header className="page-header">
+          <div className="page-header__info">
+            <span className="eyebrow">Restaurant menu</span>
+            <h2 className="page-title">Add, illustrate, and publish signature dishes.</h2>
+            <p className="page-subtitle">
+              Upload photography, set pricing, and push instant updates to every ordering interface.
+            </p>
+          </div>
+        </header>
+
+        <form className="form-grid" onSubmit={add}>
+          <div className="form-grid inline">
+            <select
+              className="select"
+              value={form.category_id}
+              onChange={(e) => setForm({ ...form, category_id: Number(e.target.value) })}
+            >
+              <option value={1}>Starters</option>
               <option value={2}>Pizzas</option>
               <option value={3}>Burgers</option>
-              <option value={4}>Pâtes</option>
-              <option value={5}>Salades</option>
+              <option value={4}>Pasta</option>
+              <option value={5}>Salads</option>
               <option value={6}>Desserts</option>
-              <option value={7}>Boissons</option>
+              <option value={7}>Drinks</option>
             </select>
-            <input placeholder="Nom" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} style={input}/>
-            <input placeholder="Prix" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} style={input}/>
-            <input type="file" accept="image/*" onChange={e=>setFile(e.target.files?.[0]||null)} style={input}/>
+            <input
+              className="input"
+              placeholder="Dish name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
+            <input
+              className="input"
+              placeholder="Price (€)"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+              required
+            />
+            <input
+              className="input"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
           </div>
-          <textarea placeholder="Description (facultatif)" value={form.description}
-            onChange={e=>setForm({...form, description:e.target.value})}
-            style={{...input, minHeight:90}} />
-          <button style={{background:"#10b981", color:"#0b0c1a", border:0, borderRadius:10, padding:"10px 16px", fontWeight:700}}>
-            Ajouter
-          </button>
-        </form>
 
-        <div style={{marginTop:18, overflowX:"auto"}}>
-          <table style={{width:"100%", borderCollapse:"collapse"}}>
+          <textarea
+            className="textarea"
+            placeholder="Optional description"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            rows={3}
+          />
+
+          <div className="page-header__actions">
+            <button type="submit" className="btn btn-primary">
+              Add dish
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => {
+                setForm({ category_id: 1, name: "", price: "", image_path: "", description: "" });
+                setFile(null);
+              }}
+            >
+              Reset form
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="menu-preview">
+        <div className="surface-card menu-preview__table">
+          <table className="data-table">
             <thead>
-              <tr><th style={th}>#</th><th style={th}>Image</th><th style={th}>Cat.</th><th style={th}>Nom</th><th style={th}>Prix</th><th style={th}></th></tr>
+              <tr>
+                <th>#</th>
+                <th>Image</th>
+                <th>Category</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th></th>
+              </tr>
             </thead>
             <tbody>
-              {items.map(i=>(
-                <tr key={i.id} style={{borderTop:"1px solid #ffffff22"}}>
-                  <td style={td}>{i.id}</td>
-                  <td style={td}>
-                    {i.image_path
-                      ? <img src={`${IMG_BASE}${i.image_path}`} alt={i.name} width={48} height={48}
-                             style={{objectFit:"cover", borderRadius:8, border:"1px solid #ffffff22"}}/>
-                      : "—"}
+              {items.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.id}</td>
+                  <td>
+                    {item.image_path ? (
+                      <span className="menu-thumb">
+                        <img src={`${IMG_BASE}${item.image_path}`} alt={item.name} />
+                      </span>
+                    ) : (
+                      "—"
+                    )}
                   </td>
-                  <td style={td}>{i.category}</td>
-                  <td style={td}>{i.name}</td>
-                  <td style={td}>{(+i.price).toFixed(2)} €</td>
-                  <td style={td}>
-                    <button onClick={()=>del(i.id)} style={{background:"#ef4444", color:"#fff", border:0, borderRadius:8, padding:"6px 10px"}}>
-                      Supprimer
+                  <td>{item.category}</td>
+                  <td>{item.name}</td>
+                  <td>{Number(item.price).toFixed(2)} €</td>
+                  <td>
+                    <button type="button" className="btn btn-danger" onClick={() => del(item.id)}>
+                      Delete
                     </button>
                   </td>
                 </tr>
               ))}
-              {items.length===0 && <tr><td style={td} colSpan={6}>Aucun plat.</td></tr>}
+              {items.length === 0 && (
+                <tr>
+                  <td colSpan={6}>
+                    <div className="empty-state">No dishes published yet.</div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-      </main>
+      </section>
     </div>
   );
 }
-const input = {background:"#0e1022", border:"1px solid #ffffff25", color:"#eaeaff", padding:"10px 12px", borderRadius:10};
-const th = { textAlign:"left", padding:"10px 8px" };
-const td = { padding:"10px 8px" };
