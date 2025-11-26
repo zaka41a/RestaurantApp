@@ -122,4 +122,4 @@ MIT License © 2025 [Zaka41a]
 
 ### 💬 Need help or want to collaborate?
 
-Open an issue, reach out on [LinkedIn](https://linkedin.com/in/your-profile), or follow the roadmap above. Let’s build a world-class dining room experience together!
+Open an issue, reach out on [LinkedIn](https://www.linkedin.com/in/zakaria-sabiri-8a97b4364/), or follow the roadmap above. Let’s build a world-class dining room experience together!
