@@ -1,4 +1,4 @@
-# 🍽️ RestaurantApp — 2025 Service Control Center
+# 🍽️ RestaurantApp  2025 Service Control Center
 
 RestaurantApp is a full‑stack platform that gives administrators and floor staff everything they need to **run a modern dining room in real time**. From menu curation to order capture and table rotation, every workflow is streamlined in a polished, production-ready UI.
 
